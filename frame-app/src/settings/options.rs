@@ -1086,6 +1086,8 @@ const fn video_codec_capability_available(
         VideoCodecCapability::HevcVideotoolbox => available_encoders.hevc_videotoolbox,
         VideoCodecCapability::HevcNvenc => available_encoders.hevc_nvenc,
         VideoCodecCapability::Av1Nvenc => available_encoders.av1_nvenc,
+        VideoCodecCapability::H264Vaapi => available_encoders.h264_vaapi,
+        VideoCodecCapability::HevcVaapi => available_encoders.hevc_vaapi,
     }
 }
 
@@ -1100,8 +1102,13 @@ pub fn is_videotoolbox_video_codec(codec: &str) -> bool {
 }
 
 #[must_use]
+pub fn is_vaapi_video_codec(codec: &str) -> bool {
+    matches!(codec, "h264_vaapi" | "hevc_vaapi")
+}
+
+#[must_use]
 pub fn is_hardware_video_codec(codec: &str) -> bool {
-    is_nvenc_video_codec(codec) || is_videotoolbox_video_codec(codec)
+    is_nvenc_video_codec(codec) || is_videotoolbox_video_codec(codec) || is_vaapi_video_codec(codec)
 }
 
 #[must_use]
@@ -1109,7 +1116,7 @@ pub fn is_video_preset_allowed(codec: &str, preset: &str) -> bool {
     if codec == "libsvtav1" && SVT_AV1_PRESETS.iter().any(|(value, _)| *value == preset) {
         return true;
     }
-    if is_videotoolbox_video_codec(codec) {
+    if is_videotoolbox_video_codec(codec) || is_vaapi_video_codec(codec) {
         return true;
     }
     if is_nvenc_video_codec(codec) {

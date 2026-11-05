@@ -29,8 +29,10 @@
 			"libsvtav1",
 			"h264_videotoolbox",
 			"h264_nvenc",
+			"h264_vaapi",
 			"hevc_videotoolbox",
 			"hevc_nvenc",
+			"hevc_vaapi",
 			"av1_nvenc"
 		],
 		"mkv": [
@@ -41,8 +43,10 @@
 			"libsvtav1",
 			"h264_videotoolbox",
 			"h264_nvenc",
+			"h264_vaapi",
 			"hevc_videotoolbox",
 			"hevc_nvenc",
+			"hevc_vaapi",
 			"av1_nvenc"
 		],
 		"webm": ["vp9"],
@@ -52,11 +56,13 @@
 			"prores",
 			"h264_videotoolbox",
 			"h264_nvenc",
+			"h264_vaapi",
 			"hevc_videotoolbox",
-			"hevc_nvenc"
+			"hevc_nvenc",
+			"hevc_vaapi"
 		],
-		"mpegts": ["mpeg2video", "libx264", "libx265", "h264_videotoolbox", "h264_nvenc", "hevc_videotoolbox", "hevc_nvenc"],
-		"m2ts": ["mpeg2video", "libx264", "libx265", "h264_videotoolbox", "h264_nvenc", "hevc_videotoolbox", "hevc_nvenc"],
+		"mpegts": ["mpeg2video", "libx264", "libx265", "h264_videotoolbox", "h264_nvenc", "h264_vaapi", "hevc_videotoolbox", "hevc_nvenc", "hevc_vaapi"],
+		"m2ts": ["mpeg2video", "libx264", "libx265", "h264_videotoolbox", "h264_nvenc", "h264_vaapi", "hevc_videotoolbox", "hevc_nvenc", "hevc_vaapi"],
 		"gif": ["gif"],
 		"png": ["png"],
 		"jpg": ["mjpeg"],
@@ -73,7 +79,9 @@
 			"h264_videotoolbox": ["yuv420p"],
 			"hevc_videotoolbox": ["yuv420p", "yuv420p10le"],
 			"h264_nvenc": ["yuv420p"],
+			"h264_vaapi": ["yuv420p"],
 			"hevc_nvenc": ["yuv420p", "yuv420p10le"],
+			"hevc_vaapi": ["yuv420p", "yuv420p10le"],
 			"av1_nvenc": ["yuv420p", "yuv420p10le"]
 		},
 		"mkv": {
@@ -85,7 +93,9 @@
 			"h264_videotoolbox": ["yuv420p"],
 			"hevc_videotoolbox": ["yuv420p", "yuv420p10le"],
 			"h264_nvenc": ["yuv420p"],
+			"h264_vaapi": ["yuv420p"],
 			"hevc_nvenc": ["yuv420p", "yuv420p10le"],
+			"hevc_vaapi": ["yuv420p", "yuv420p10le"],
 			"av1_nvenc": ["yuv420p", "yuv420p10le"]
 		},
 		"webm": {
@@ -98,7 +108,9 @@
 			"h264_videotoolbox": ["yuv420p"],
 			"hevc_videotoolbox": ["yuv420p", "yuv420p10le"],
 			"h264_nvenc": ["yuv420p"],
-			"hevc_nvenc": ["yuv420p", "yuv420p10le"]
+			"h264_vaapi": ["yuv420p"],
+			"hevc_nvenc": ["yuv420p", "yuv420p10le"],
+			"hevc_vaapi": ["yuv420p", "yuv420p10le"]
 		},
 		"mpegts": {
 			"mpeg2video": ["yuv420p", "yuv422p"],
@@ -107,7 +119,9 @@
 			"h264_videotoolbox": ["yuv420p"],
 			"hevc_videotoolbox": ["yuv420p", "yuv420p10le"],
 			"h264_nvenc": ["yuv420p"],
-			"hevc_nvenc": ["yuv420p", "yuv420p10le"]
+			"h264_vaapi": ["yuv420p"],
+			"hevc_nvenc": ["yuv420p", "yuv420p10le"],
+			"hevc_vaapi": ["yuv420p", "yuv420p10le"]
 		},
 		"m2ts": {
 			"mpeg2video": ["yuv420p", "yuv422p"],
@@ -116,7 +130,9 @@
 			"h264_videotoolbox": ["yuv420p"],
 			"hevc_videotoolbox": ["yuv420p", "yuv420p10le"],
 			"h264_nvenc": ["yuv420p"],
-			"hevc_nvenc": ["yuv420p", "yuv420p10le"]
+			"h264_vaapi": ["yuv420p"],
+			"hevc_nvenc": ["yuv420p", "yuv420p10le"],
+			"hevc_vaapi": ["yuv420p", "yuv420p10le"]
 		},
 		"gif": {
 			"gif": []

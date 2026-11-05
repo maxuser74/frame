@@ -18,6 +18,8 @@ pub struct AvailableEncoders {
     pub hevc_videotoolbox: bool,
     pub hevc_nvenc: bool,
     pub av1_nvenc: bool,
+    pub h264_vaapi: bool,
+    pub hevc_vaapi: bool,
     pub libfdk_aac: bool,
     pub libmp3lame: bool,
 }
@@ -74,6 +76,8 @@ pub fn parse_available_encoders(ffmpeg_encoders_stdout: impl AsRef<str>) -> Avai
         hevc_videotoolbox: encoder_list_contains(stdout, "hevc_videotoolbox"),
         hevc_nvenc: encoder_list_contains(stdout, "hevc_nvenc"),
         av1_nvenc: encoder_list_contains(stdout, "av1_nvenc"),
+        h264_vaapi: encoder_list_contains(stdout, "h264_vaapi"),
+        hevc_vaapi: encoder_list_contains(stdout, "hevc_vaapi"),
         libfdk_aac: encoder_list_contains(stdout, "libfdk_aac"),
         libmp3lame: encoder_list_contains(stdout, "libmp3lame"),
     }
@@ -140,6 +144,8 @@ Encoders:
  V....D h264_nvenc NVIDIA NVENC H.264 encoder
  V....D hevc_nvenc NVIDIA NVENC hevc encoder
  V....D av1_nvenc NVIDIA NVENC av1 encoder
+ V....D h264_vaapi H.264/AVC (VAAPI)
+ V....D hevc_vaapi H.265/HEVC (VAAPI)
  A..... libfdk_aac Fraunhofer FDK AAC
  A..... libmp3lame libmp3lame MP3
  V.S... mpeg2video MPEG-2 video
@@ -162,6 +168,8 @@ Encoders:
                 hevc_videotoolbox: true,
                 hevc_nvenc: true,
                 av1_nvenc: true,
+                h264_vaapi: true,
+                hevc_vaapi: true,
                 libfdk_aac: true,
                 libmp3lame: true,
             }

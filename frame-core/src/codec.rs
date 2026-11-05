@@ -1,6 +1,7 @@
 use crate::types::ConversionConfig;
 use crate::utils::{
-    is_nvenc_codec, is_svt_av1_codec, is_videotoolbox_codec, map_nvenc_preset, map_svt_av1_preset,
+    is_nvenc_codec, is_svt_av1_codec, is_vaapi_codec, is_videotoolbox_codec, map_nvenc_preset,
+    map_svt_av1_preset,
 };
 
 pub fn add_video_codec_args(args: &mut Vec<String>, config: &ConversionConfig) {
@@ -12,6 +13,7 @@ pub fn add_video_codec_args(args: &mut Vec<String>, config: &ConversionConfig) {
     let is_nvenc = is_nvenc_codec(&config.video_codec);
     let is_svt_av1 = is_svt_av1_codec(&config.video_codec);
     let is_videotoolbox = is_videotoolbox_codec(&config.video_codec);
+    let is_vaapi = is_vaapi_codec(&config.video_codec);
 
     args.push("-c:v".to_string());
     args.push(config.video_codec.clone());
@@ -19,7 +21,7 @@ pub fn add_video_codec_args(args: &mut Vec<String>, config: &ConversionConfig) {
     // Quick Look requires the hvc1 sample entry for newly encoded HEVC in MP4/MOV.
     if matches!(
         config.video_codec.as_str(),
-        "libx265" | "hevc_videotoolbox" | "hevc_nvenc"
+        "libx265" | "hevc_videotoolbox" | "hevc_nvenc" | "hevc_vaapi"
     ) && (config.container.eq_ignore_ascii_case("mp4")
         || config.container.eq_ignore_ascii_case("mov"))
     {
@@ -50,6 +52,11 @@ pub fn add_video_codec_args(args: &mut Vec<String>, config: &ConversionConfig) {
         args.push("vbr".to_string());
         args.push("-cq:v".to_string());
         args.push(cq.to_string());
+    } else if is_vaapi {
+        args.push("-rc_mode".to_string());
+        args.push("CQP".to_string());
+        args.push("-qp".to_string());
+        args.push(config.crf.to_string());
     } else if is_videotoolbox {
         args.push("-q:v".to_string());
         args.push(config.quality.to_string());
@@ -58,7 +65,7 @@ pub fn add_video_codec_args(args: &mut Vec<String>, config: &ConversionConfig) {
         args.push(config.crf.to_string());
     }
 
-    if !is_videotoolbox {
+    if !is_videotoolbox && !is_vaapi {
         args.push("-preset".to_string());
         let preset_value = if is_nvenc {
             map_nvenc_preset(&config.preset)

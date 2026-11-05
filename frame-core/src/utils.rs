@@ -64,6 +64,30 @@ pub fn is_videotoolbox_codec(codec: &str) -> bool {
 }
 
 #[must_use]
+pub fn is_vaapi_codec(codec: &str) -> bool {
+    matches!(codec, "h264_vaapi" | "hevc_vaapi")
+}
+
+/// Render node used for VAAPI; override with `FRAME_VAAPI_DEVICE`.
+#[must_use]
+pub fn vaapi_device_path() -> String {
+    std::env::var("FRAME_VAAPI_DEVICE")
+        .ok()
+        .filter(|path| !path.trim().is_empty())
+        .unwrap_or_else(|| "/dev/dri/renderD128".to_string())
+}
+
+/// Filter that moves software frames onto the VAAPI device for encoding.
+#[must_use]
+pub fn vaapi_upload_filter(pixel_format: &str) -> &'static str {
+    if pixel_format.contains("10") {
+        "format=p010le,hwupload"
+    } else {
+        "format=nv12,hwupload"
+    }
+}
+
+#[must_use]
 pub fn map_nvenc_preset(preset: &str) -> String {
     match preset {
         "default" => "default".to_string(),
@@ -123,6 +147,13 @@ pub fn get_hwaccel_args(video_codec: &str) -> Vec<String> {
         ]
     } else if is_videotoolbox_codec(video_codec) {
         vec!["-hwaccel".to_string(), "videotoolbox".to_string()]
+    } else if is_vaapi_codec(video_codec) {
+        vec![
+            "-hwaccel".to_string(),
+            "vaapi".to_string(),
+            "-hwaccel_device".to_string(),
+            vaapi_device_path(),
+        ]
     } else {
         vec![]
     }

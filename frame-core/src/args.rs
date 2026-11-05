@@ -22,7 +22,10 @@ use crate::types::{
     AudioTrack, ConversionConfig, ExternalSubtitleTrack, MetadataConfig, MetadataMode,
     ProbeMetadata, SubtitleTrack, VOLUME_EPSILON,
 };
-use crate::utils::{get_hwaccel_args, is_audio_only_container, parse_time};
+use crate::utils::{
+    get_hwaccel_args, is_audio_only_container, is_vaapi_codec, parse_time, vaapi_device_path,
+    vaapi_upload_filter,
+};
 
 fn is_copy_mode(config: &ConversionConfig) -> bool {
     config.processing_mode == "copy"
@@ -497,6 +500,11 @@ pub fn build_ffmpeg_args(
 ) -> Result<Vec<String>, ConversionError> {
     let mut args = Vec::new();
 
+    let is_vaapi = is_vaapi_codec(&config.video_codec) && !is_copy_mode(config);
+    if is_vaapi {
+        args.extend(["-vaapi_device".to_string(), vaapi_device_path()]);
+    }
+
     // Hardware decode acceleration (must be before -i)
     if config.hw_decode {
         args.extend(get_hwaccel_args(&config.video_codec));
@@ -653,16 +661,25 @@ pub fn build_ffmpeg_args(
         args.push("1".to_string());
     } else {
         add_video_codec_args(&mut args, config);
-        if has_custom_pixel_format(config) {
+        // VAAPI takes hardware frames, so the pixel format is set by the upload filter.
+        if has_custom_pixel_format(config) && !is_vaapi {
             args.push("-pix_fmt".to_string());
             args.push(config.pixel_format.trim().to_string());
         }
+        let vaapi_upload = vaapi_upload_filter(config.pixel_format.trim());
 
         if use_overlay {
             args.push("-filter_complex".to_string());
-            args.push(build_encode_overlay_filter_complex(config));
+            let mut filter_complex = build_encode_overlay_filter_complex(config);
+            if is_vaapi {
+                filter_complex = format!("{filter_complex};[vout]{vaapi_upload}[vout_hw]");
+            }
+            args.push(filter_complex);
         } else {
-            let video_filters = build_encode_video_filters(config, true);
+            let mut video_filters = build_encode_video_filters(config, true);
+            if is_vaapi {
+                video_filters.push(vaapi_upload.to_string());
+            }
             if !video_filters.is_empty() {
                 args.push("-vf".to_string());
                 args.push(video_filters.join(","));
@@ -671,7 +688,9 @@ pub fn build_ffmpeg_args(
 
         add_fps_args(&mut args, config);
         args.push("-map".to_string());
-        args.push(if use_overlay {
+        args.push(if use_overlay && is_vaapi {
+            "[vout_hw]".to_string()
+        } else if use_overlay {
             "[vout]".to_string()
         } else {
             "0:v:0".to_string()
@@ -1495,6 +1514,24 @@ mod tests {
                 assert!(!args.iter().any(|arg| arg == "-tag:v"));
             }
         }
+    }
+
+    #[test]
+    fn vaapi_reencode_uploads_frames_and_uses_cqp() {
+        let args = build_ffmpeg_args(
+            "in.mp4",
+            "out.mp4",
+            &sample_config("mp4", "hevc_vaapi"),
+            &sample_probe(),
+        )
+        .unwrap();
+
+        assert!(args.windows(2).any(|pair| pair[0] == "-vaapi_device"));
+        assert!(args.windows(2).any(|pair| pair == ["-rc_mode", "CQP"]));
+        assert!(args.windows(2).any(|pair| pair == ["-tag:v", "hvc1"]));
+        assert!(!args.iter().any(|arg| arg == "-preset" || arg == "-pix_fmt"));
+        let vf_index = args.iter().position(|arg| arg == "-vf").unwrap();
+        assert!(args[vf_index + 1].ends_with("format=nv12,hwupload"));
     }
 
     #[test]

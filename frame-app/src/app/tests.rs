@@ -4009,6 +4009,8 @@ mod preview_shell {
             hevc_videotoolbox: false,
             hevc_nvenc: false,
             av1_nvenc: false,
+            h264_vaapi: false,
+            hevc_vaapi: false,
             libfdk_aac: false,
             libmp3lame: false,
         };
